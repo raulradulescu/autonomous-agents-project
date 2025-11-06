@@ -126,6 +126,23 @@
             stroke-opacity: 0.6;
         }
         
+        .activity-edge {
+            stroke-opacity: 1;
+            stroke-width: 3;
+            animation: pulse 0.6s ease-out;
+        }
+        
+        @keyframes pulse {
+            0% {
+                stroke-width: 3;
+                stroke-opacity: 1;
+            }
+            100% {
+                stroke-width: 6;
+                stroke-opacity: 0;
+            }
+        }
+        
         .axis {
             font-size: 12px;
         }
@@ -249,6 +266,11 @@
             // Update network
             networkData = data.network;
             drawNetwork();
+            
+            // Highlight edge activities
+            if (data.edge_activities && data.edge_activities.length > 0) {
+                highlightEdgeActivities(data.edge_activities);
+            }
         }
         
         function drawChart() {
@@ -444,6 +466,31 @@
                 // Save the new position
                 nodePositions.set(d.id, {x: d.fx, y: d.fy});
             }
+        }
+        
+        function highlightEdgeActivities(activities) {
+            // Draw activity edges that will animate
+            activities.forEach(activity => {
+                const sourceNode = networkData.nodes.find(n => n.id === activity.source);
+                const targetNode = networkData.nodes.find(n => n.id === activity.target);
+                
+                if (sourceNode && targetNode) {
+                    // Add temporary animated edge
+                    const activityLine = networkGroup.append("line")
+                        .attr("class", "activity-edge")
+                        .attr("x1", sourceNode.x)
+                        .attr("y1", sourceNode.y)
+                        .attr("x2", targetNode.x)
+                        .attr("y2", targetNode.y)
+                        .attr("stroke", activity.color)
+                        .attr("stroke-width", 3);
+                    
+                    // Remove after animation completes
+                    setTimeout(() => {
+                        activityLine.remove();
+                    }, 600);
+                }
+            });
         }
         
         // Control functions
