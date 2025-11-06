@@ -7,9 +7,15 @@ Agent-based cyber-range simulation on a network graph built with Mesa + NetworkX
 - Agents: Attacker, Defender, User with distinct behaviors
 - Interactive browser visualization with:
   - Side-by-side layout: line chart (left) and network topology (right)
-  - Stable network graph with fixed node positions
+  - **Dynamic node count control**: Adjust network size (10-50 nodes) in real-time with slider
+  - **Zoomable and pannable network**: Scroll to zoom, drag to pan the network graph
+  - **Stable network graph**: Fixed node positions prevent jittering during updates
+  - **Real-time edge animations**: See attacks, defenses, and quarantines as they happen
+    - 🔴 Red pulses for attacker exploits and phishing
+    - 🟢 Green pulses for defender patches and scans
+    - 🟣 Purple pulses for quarantine actions
   - Real-time color-coded nodes: green (healthy), red (compromised), blue (patched), purple (quarantined)
-  - Live statistics panel
+  - Live statistics panel with step counter
 - Headless runner that exports interactions to CSV
 - Comprehensive unit tests supporting TDD
 
@@ -105,13 +111,17 @@ The server starts on `http://127.0.0.1:8555` by default. Open this in your brows
 - **Blue nodes** 🔵 = Patched systems
 - **Purple nodes** 🟣 = Quarantined systems
 - **Gray lines** = Network connections
+- **Animated edges** = Real-time actions (attacks in red, defenses in green, quarantines in purple)
 
-**Controls:**
+**Interactive Controls:**
+- **Nodes Slider**: Dynamically adjust network size (10-50 nodes) - changes apply on next reset
 - **Start/Pause**: Run or pause the simulation
 - **Step**: Advance one time step manually
-- **Reset**: Restart with a new simulation (repositions network)
+- **Reset**: Restart with a new simulation using current node count
 - **FPS Slider**: Control simulation speed (1-20 frames per second)
-- **Drag Nodes**: Click and drag nodes to rearrange them (positions are preserved)
+- **Zoom**: Scroll mouse wheel over network to zoom in/out (0.5x - 5x)
+- **Pan**: Click and drag the network background to move the view
+- **Drag Nodes**: Click and drag individual nodes to rearrange them (positions are preserved)
 
 ### 4) Run headless simulation and export data
 For batch experiments or data collection without the GUI:
@@ -192,7 +202,16 @@ All simulations can be customized with these parameters:
    - Users move around (may click phishing)
    - States update based on successful actions
    - Data collector records current state counts
-4. **Visualization Updates**: Browser displays new states in real-time
+   - **Edge activities visualized**: Successful actions trigger colored pulse animations
+4. **Visualization Updates**: Browser displays new states in real-time with edge highlights
+
+### Visual Feedback
+The visualization provides immediate visual feedback for agent actions:
+- **🔴 Red pulse**: Attacker successfully exploits or phishes a node
+- **🟢 Green pulse**: Defender patches or scans a node
+- **🟣 Purple pulse**: Defender quarantines a compromised node
+- **Node color changes**: Nodes transition between states (green→red→blue/purple)
+- **Persistent layout**: Node positions remain stable, edges animate over existing topology
 
 ### Attack-Defense Dynamics
 - Attackers have **higher success** against healthy nodes
@@ -203,6 +222,12 @@ All simulations can be customized with these parameters:
 
 ## Next Steps & Extensions
 
+### Recently Implemented ✅
+- **Dynamic Network Sizing**: Real-time slider control for node count (10-50 nodes)
+- **Zoom and Pan**: Interactive network navigation with mouse wheel zoom and drag-to-pan
+- **Edge Activity Visualization**: Color-coded pulse animations showing attacks and defenses
+- **Stable Node Positions**: Nodes maintain positions across updates to prevent jittering
+
 ### Planned Features
 - **YAML Configuration**: External config files for easier parameter tuning
 - **Shell Scripts**: Convenience scripts for common workflows
@@ -211,6 +236,7 @@ All simulations can be customized with these parameters:
 - **Cost/Utility Model**: Track downtime penalties and remediation costs
 - **Heterogeneous Nodes**: Different roles (server/workstation/router) with varying vulnerability
 - **Playback Mode**: Save and replay simulations frame-by-frame
+- **Agent Labeling**: Show agent IDs/types on hover or toggle labels
 
 ### Research & Analysis Ideas
 - Compare different defender strategies (reactive vs. proactive patching)
