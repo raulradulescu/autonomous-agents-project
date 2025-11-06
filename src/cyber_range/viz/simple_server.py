@@ -24,9 +24,12 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
         msg = json.loads(message)
         
         if msg["type"] == "reset":
-            # Create new model
+            # Get num_nodes from message, default to 20
+            num_nodes = msg.get("num_nodes", 20)
+            
+            # Create new model with specified number of nodes
             self.model = CyberRangeModel(
-                num_nodes=20,
+                num_nodes=num_nodes,
                 k=4,
                 p=0.15,
                 num_attackers=2,
@@ -52,6 +55,37 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
         # Get network portrayal
         network_data = network_portrayal(self.model.G)
         
+        # Get recent interactions from this step for edge highlighting
+        edge_activities = []
+        current_step = self.model.step_count
+        for step, src_agent_id, dst_node, action, success in self.model.interactions:
+            if step == current_step and success:
+                # Get the source node where the agent is located
+                agent = None
+                for a in self.model.schedule.agents:
+                    if a.unique_id == src_agent_id:
+                        agent = a
+                        break
+                
+                if agent:
+                    src_node = agent.pos
+                    # Determine color based on action
+                    if action in ['exploit', 'phish']:
+                        color = '#ff0000'  # Red for attacks
+                    elif action == 'quarantine':
+                        color = '#9467bd'  # Purple for quarantine
+                    elif action in ['patch', 'scan']:
+                        color = '#10b981'  # Green for defender actions
+                    else:
+                        color = '#1f77b4'  # Blue for other actions
+                    
+                    edge_activities.append({
+                        'source': src_node,
+                        'target': dst_node,
+                        'color': color,
+                        'action': action
+                    })
+        
         # Get datacollector data for chart
         df = self.model.datacollector.get_model_vars_dataframe()
         chart_data = []
@@ -74,7 +108,8 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
             'network': network_data,
             'chart': chart_data,
             'stats': stats_text,
-            'step': self.model.step_count
+            'step': self.model.step_count,
+            'edge_activities': edge_activities
         }))
 
 
